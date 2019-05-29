@@ -1,0 +1,24 @@
+{
+  "name": "hemicycle-builer",
+  "version": "1.0.0",
+  "description": "An essential tool used to build hemicycles based on user input.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/layer-ray/hemicycle-builder.git"
+  },
+  "keywords": [
+    "hemicycle",
+    "svg",
+    "parametric"
+  ],
+  "author": "Layer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/layer-ray/hemicycle-builder/issues"
+  },
+  "homepage": "https://github.com/layer-ray/hemicycle-builder#readme"
+}

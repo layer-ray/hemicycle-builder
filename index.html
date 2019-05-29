@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Hemicycle test</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <header>
+        <h2 class="title">Hemicycle builder</h2>        
+    </header>
+    <section class="options">
+        <fieldset class ="pane">
+            <legend>viewport</legend>
+            <div class="field">
+                <label for="width">Width:</label>
+                <input 
+                    type="number" 
+                    name="width" 
+                    id="width"
+                    value="300"
+                    min="1"
+                >
+            </div>
+            <div class="field">
+                <label for="height">Height:</label>
+                <input 
+                    type="number" 
+                    name="height" 
+                    id="height"
+                    value="300"
+                    min="1"
+                >
+            </div>
+        </fieldset>
+        <fieldset class ="pane">
+            <legend>content</legend>
+            <div class="field">
+                <label for="rows">Rows:</label>
+                <input 
+                    type="number" 
+                    name="rows" 
+                    id="rows"
+                    value="12"
+                    min="1"
+                >
+            </div>
+            <div class="field">
+                <label for="dot-radius">MEP radius:</label>
+                <input 
+                    type="number" 
+                    name="dot-radius" 
+                    id="dot-radius"
+                    value="4"
+                    min="1"
+                >
+            </div>
+        </fieldset>
+        <fieldset class ="pane">
+            <legend> hemicycle</legend>
+            <div class="field">
+                <label for="min-radius">Min radius:</label>
+                <input 
+                    type="number" 
+                    name="min-radius" 
+                    id="min-radius"
+                    value="50"
+                    min="10"
+                >
+            </div>
+            <div class="field">
+                <label for="max-radius">Max radius:</label>
+                <input 
+                    type="number" 
+                    name="max-radius" 
+                    id="max-radius"
+                    value="150"
+                    min="10"
+                >
+            </div>
+            <div class="field">
+                <label for="num-sections">Num sections:</label>
+                <input 
+                    type="number" 
+                    name="num-sections" 
+                    id="num-sections"
+                    value="1"
+                    min="1"
+                >
+            </div>
+            <div class="field">
+                <label for="gap-section">Gap between sections:</label>
+                <input 
+                    type="number" 
+                    name="gap-section" 
+                    id="gap-section"
+                    value="1"
+                    min="1"
+                >
+            </div>
+            <div class="field">
+                <label for="section-size">Section size (degree):</label>
+                <input 
+                    type="number" 
+                    name="section-size" 
+                    id="section-size"
+                    value="20"
+                    min="1"
+                >
+            </div>
+            <div class="field">
+                <label for="start-incline">Rotation (degree):</label>
+                <input 
+                    type="number" 
+                    name="start-incline" 
+                    id="start-incline"
+                    value="0"
+                >
+            </div>
+        </fieldset>
+    </section>
+    <div class="inner-label" id="inner-label">
+            <span>Tot:</span><span id="tot"></span>
+    </div>
+    <div class="inner-options" id="inner-options">
+        <div class="field">
+            <label for="section-borders">Section borders</label>
+            <input type="checkbox" name="section-borders" id="section-borders" checked>
+        </div>
+        <div class="field">
+            <label for="filler-dots">Filler dots</label>
+            <input type="checkbox" name="filler-dots" id="filler-dots" checked>
+        </div>
+    </div>
+    <div class="notification" id="notification"></div>
+    <script src="index.js"></script>
+</body>
+
+</html>

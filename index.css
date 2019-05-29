@@ -1,0 +1,83 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+#svg-container {
+    position: relative;
+    margin: auto;
+}
+
+.inner-label,
+.inner-options {
+    position: absolute;
+    padding: 1rem;
+}
+
+.inner-label {
+    left: 0;
+}
+
+.inner-options {
+    right: 0;
+}
+
+.svg-root {
+    border: 1px solid #222;
+    margin: auto;
+    display: block;
+}
+
+
+.title {
+    text-align: center;
+}
+
+.options {
+    display: flex;
+    flex-flow: column wrap;
+    height: 200px;
+    max-width: 768px;
+    margin: 1rem auto;
+}
+
+.pane {
+    flex-grow: 1;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-around;
+}
+
+.pane legend {
+    font: 400 1rem Courier, Monospace;
+}
+
+.field {
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dotted #777;
+}
+
+input {
+    width: 20%;
+}
+
+.notification {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #222;
+    padding: 1rem;
+    opacity: 0.8;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 200ms;
+    pointer-events: none;
+}
+
+.fadeIn {
+    opacity: 1
+}
+
+.hidden {
+    display: none;
+}
