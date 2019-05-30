@@ -1,3 +1,4 @@
+import { saveAs } from 'file-saver';
 import { cleanSvg } from './helpers';
 import { drawPath, drawFillerDots } from './drawing';
 import { calculateSectionPoints, calculateFillerDots } from './calc';
@@ -30,6 +31,9 @@ let fillerDotsCheck = document.getElementById('filler-dots');
 let totTitle = document.getElementById('tot');
 let notification = document.getElementById('notification');
 let buttons = document.getElementById('buttons');
+let exportPointsBtn = document.getElementById('export-points');
+let exportBordersBtn = document.getElementById('export-borders');
+let exportAllBtn = document.getElementById('export-all');
 
 // initial state
 let center = {x: 400, y:280};
@@ -86,6 +90,9 @@ body.appendChild(containerDiv);
 let dotMissing = false;
 let pathMissing = false;
 
+// export variables
+let toExportPoints = 'x, y\n';
+
 drawHemicycle();
 
 /* 
@@ -136,11 +143,10 @@ function drawHemicycle(){
     if(fillerDotsCheck.checked) {
         dotMissing = false;
         let pointCoordsArr = calculateFillerDots(sectionData, fillerData, patternOptions);
-
         for(let d=0;d<pointCoordsArr.sectionsMepCoords.length; d++){
-            drawFillerDots(root, pointCoordsArr.sectionsMepCoords[d], mepRad, center);
+            let points = drawFillerDots(root, pointCoordsArr.sectionsMepCoords[d], mepRad, center);
+            points.forEach(point => toExportPoints += `${point.x}, ${point.y}\n`);
         };
-
         totTitle.innerText = pointCoordsArr.total;
         addPopup();
     } else {
@@ -241,7 +247,7 @@ function toggleDots(){
         dots[i].classList.toggle('hidden');
     };
     if(dotMissing) drawHemicycle();
-};
+}
 
 function togglePaths(){
     let paths = document.querySelectorAll('#svg-container path');
@@ -249,6 +255,38 @@ function togglePaths(){
         paths[i].classList.toggle('hidden');
     }
     if(pathMissing) drawHemicycle();
+}
+
+function exportCsvCoords(){
+    let blob = new Blob([toExportPoints], {type: "text/csv;charset=utf-8"});
+    saveAs(blob, "hemicycle-dots.csv");
+}
+
+function exportSvg(e){
+    let newRoot = '';
+    let borders = document.querySelectorAll('.svg-root path');
+    if(e.target.id === 'export-borders') {
+        newRoot = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        newRoot.setAttribute('width', wpWidth);
+        newRoot.setAttribute('height', wpHeight);
+        borders.forEach(border => {
+            let newBorder = border.cloneNode(false);
+            newRoot.appendChild(newBorder)
+        });
+    } else if(e.target.id === 'export-all') {
+        newRoot = root.cloneNode(true);
+    } 
+    
+
+    // credits to defghi1977 [STACK OVERFLOW]
+    let serializer = new XMLSerializer();
+    let source = serializer.serializeToString(newRoot);
+    // required if used as external image
+    source = '<?xml version="1.0" ?>\r\n' + source;
+
+    let url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
+     
+    saveAs(url, "hemicycle.svg");
 }
 
 // input event listener allow cool dynamic change but is risky
@@ -268,5 +306,9 @@ heightInput.addEventListener('change', drawHemicycle);
 
 sectionBordersCheck.addEventListener('change', togglePaths);
 fillerDotsCheck.addEventListener('change', toggleDots);
+
+exportPointsBtn.addEventListener('click', exportCsvCoords);
+exportBordersBtn.addEventListener('click', exportSvg);
+exportAllBtn.addEventListener('click', exportSvg);
 
 window.addEventListener('error', displayNotification)

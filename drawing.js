@@ -36,6 +36,7 @@ export function drawPath(svgElement, points, r1, r2){
 };
 
 export function drawFillerDots(svgElement, pointCoords, dotRadius, origin){
+    let pointArr = [];
     pointCoords.forEach(dot => {
         // each point have its coords translated to cartesian and
         // drawn in user coords system
@@ -44,8 +45,10 @@ export function drawFillerDots(svgElement, pointCoords, dotRadius, origin){
         // Is moved up by a factor of 3/2 to have it inside plus a 
         // minimum padding
         let pt = polarToCartesian((dot.radius + (dotRadius *3/2)),toDegree(dot.angle));
-        drawPoint(svgElement, pt.x, pt.y, dotRadius,
+        let drawnPoint = drawPoint(svgElement, pt.x, pt.y, dotRadius,
                     {x:origin.x, y:origin.y}, 
                     undefined, dot.pos);
+        pointArr.push(drawnPoint);
     });
+    return pointArr;
 }
