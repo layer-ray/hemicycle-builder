@@ -1,3 +1,8 @@
+import { cleanSvg } from './helpers';
+import { drawPath, drawFillerDots } from './drawing';
+import { calculateSectionPoints, calculateFillerDots } from './calc';
+import './index.css';
+
 let body = document.getElementsByTagName('body')[0];
 
 // Hemicycle variables
@@ -25,15 +30,18 @@ let fillerDotsCheck = document.getElementById('filler-dots');
 let totTitle = document.getElementById('tot');
 
 // initial state
-let center = [400, 280];
-let min_radius = 70;
-let max_radius = 250;
+let center = {x: 400, y:280};
+let wpWidth = center.x *2;
+let wpHeight = center.y *2;
+let min_radius = 75;
+let max_radius = 235;
 let gapRad = max_radius - min_radius;
 let angleSize = 42;
 let numSections = 5;
 let gapLines = 1;
 let startIncline = -17;
-
+let rows = 12;
+let mepRad = 4;
 // assign initial state to input elements
 minRadiusInput.value = min_radius;
 maxRadiusInput.value = max_radius;
@@ -42,25 +50,30 @@ numSectionsInput.value =  numSections;
 gapSectionSizeInput.value = gapLines;
 startInclineInput.value = startIncline;
 
-widthInput.value = center[0] * 2;
-heightInput.value = center[1] * 2;
+widthInput.value = wpWidth;
+heightInput.value = wpHeight;
+
+rowsInput.value = rows;
+mepRadInput.value = mepRad;
 
 // create additional nodes: svg and main (to append ui elements)
 let containerDiv = document.createElement('main');
 let root = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
 // dynamically set attributes of newly generated element
-containerDiv.style.width = (center[0]*2) + 'px';
-containerDiv.style.height = (center[1]*2) + 'px';
+containerDiv.style.width = wpWidth + 'px';
+containerDiv.style.height = wpHeight + 'px';
 containerDiv.setAttribute('id', 'svg-container');
 
-root.setAttribute('width', center[0]*2);
-root.setAttribute('height', center[1]*2);
+root.setAttribute('width', wpWidth);
+root.setAttribute('height', wpHeight);
 root.setAttribute('class', 'svg-root');
 
 // append ui element and svg to container
 containerDiv.appendChild(innerLabel);
 containerDiv.appendChild(innerOptions);
+containerDiv.appendChild(notification);
+
 containerDiv.appendChild(root);
 // append container to body
 body.appendChild(containerDiv);
@@ -72,15 +85,75 @@ let pathMissing = false;
 
 drawHemicycle();
 
-function drawHemicycle(){ 
-    // validation - if error restore previous values
+/* 
+main function. It:
+        - validates input
+        - group data
+        - remove any svg child element
+        - calculates path values
+        - draw paths
+        - calculates dot values
+        - draw dots
+ */
+function drawHemicycle(){
+    
+    validateInput();
+
+    let sectionData = {
+        origin: center,
+        r1: min_radius,
+        r2: max_radius,
+        angle: angleSize
+    };
+
+    let patternOptions = {
+        n: numSections,
+        startAngle: startIncline,
+        gapAngle: gapLines
+    };
+
+    let fillerData = {
+        rows: rows,
+        dotRadius: mepRad
+    };
+
+    cleanSvg(root);
+    let sectionPoints = calculateSectionPoints(sectionData, patternOptions);
+    // ux check(there could be a checked option and no draw)
+    if(sectionBordersCheck.checked) {
+        pathMissing = false;
+        // draw section borders
+        for(let section of sectionPoints){
+            drawPath(root, section, min_radius, max_radius);
+        };
+    } else {
+        pathMissing = true;
+    };
+    // ux check(there could be a checked option and no draw)
+    if(fillerDotsCheck.checked) {
+        dotMissing = false;
+        let pointCoordsArr = calculateFillerDots(sectionData, fillerData, patternOptions);
+
+        for(let d=0;d<pointCoordsArr.sectionsMepCoords.length; d++){
+            drawFillerDots(root, pointCoordsArr.sectionsMepCoords[d], mepRad, center);
+        };
+
+        totTitle.innerText = pointCoordsArr.total;
+        addNotification();
+    } else {
+        dotMissing = true;
+    };
+}
+
+function validateInput(){
+ // validation - if error restore previous values
     if(+widthInput.value/2 <= max_radius ||  +heightInput.value/2 <= max_radius){
-        widthInput.value =  center[0] * 2;
-        heightInput.value = center[1] * 2;
+        widthInput.value =  wpWidth;
+        heightInput.value = wpHeight;
         throw Error('Max dimension reached. Please increase the size of viewport to create bigger hemicycles');
     };
 
-    if(+maxRadiusInput.value > Math.min(...center) ){
+    if(+maxRadiusInput.value > Math.min(center.x, center.y) ){
         maxRadiusInput.value = max_radius;
         throw Error('Max dimension reached. Please increase the size of viewport to create bigger hemicycles');
     };
@@ -97,15 +170,27 @@ function drawHemicycle(){
         gapSectionSizeInput.value = gapLines;
         throw Error('Whole circle reached');
     };
+
+    if( (+rowsInput.value) * (+mepRadInput.value*2) > 
+         +maxRadiusInput.value - +minRadiusInput.value) {
+        rowsInput.value = rows;
+        mepRadInput.value = mepRad;
+        maxRadiusInput.value = max_radius;
+        minRadiusInput.value = min_radius;
+        throw Error('content is too squeezed. Please increase the height of the section or reduce the number of rows or the dot radius');
+    }
     
     // values are valids, so they are assigned to the variables
-    center[0] = +widthInput.value/2;
-    center[1] = +heightInput.value/2;
-    root.setAttribute('width', +widthInput.value);
-    root.setAttribute('height',  +heightInput.value);
+    wpWidth = +widthInput.value;
+    wpHeight = +heightInput.value;
+    root.setAttribute('width', wpWidth);
+    root.setAttribute('height',  wpHeight);
     
-    containerDiv.style.width = widthInput.value + 'px';
-    containerDiv.style.height =  heightInput.value + 'px';
+    containerDiv.style.width = wpWidth + 'px';
+    containerDiv.style.height =  wpHeight + 'px';
+
+    center.x = wpWidth /2;
+    center.y = wpHeight/2;
 
     min_radius = +minRadiusInput.value;
     max_radius = +maxRadiusInput.value;
@@ -114,90 +199,17 @@ function drawHemicycle(){
     numSections = +numSectionsInput.value;
     gapLines = +gapSectionSizeInput.value;
     startIncline= +startInclineInput.value;
-
-    cleanSvg(root);
-    // get the section vertex coordinates, using min and max radius
-    let lowerPoints = setPoints(numSections, min_radius, angleSize, gapLines, startIncline);
-    let upperPoints = setPoints(numSections, max_radius, angleSize, gapLines, startIncline);
-
-    // different number of vertex among inner and outer means trouble
-    if(lowerPoints.length !== upperPoints.length) {
-        throw Error('Something went wrong');
-    };
-
-    let sectionPoints = [];
-
-    // sectionPoints arr is build taking 2 points from lower radius
-    // and two from the upper. Those will be joined and used as 
-    // vertexes to build the path
-    for(let i=0;i<lowerPoints.length; i+=2){
-        let lowSecPoints = [ lowerPoints[i], lowerPoints[i+1] ];
-        let upSecPoints = [ upperPoints[i], upperPoints[i+1] ];
-        sectionPoints.push(lowSecPoints.concat(upSecPoints));
-    };
-
-    // ux check(there could be a checked option and no draw)
-    if(sectionBordersCheck.checked) {
-        pathMissing = false;
-        for(let section of sectionPoints){
-            // draw section borders
-            drawPath(section);
-        };
-    } else {
-        pathMissing = true;
-    };
-
-    if(fillerDotsCheck.checked) {
-        dotMissing = false;
-        // draw points
-        populateHemicycle();
-    } else {
-        dotMissing = true;
-    };
+    rows = +rowsInput.value;
+    mepRad = +mepRadInput.value;
 }
 
-function populateHemicycle(){
-    let rows = rowsInput.value;
-    let mepRad = mepRadInput.value;
-    let stripe = (max_radius - min_radius)/rows;
-    let radArr = [];
-    // prepares array with the radii dimension
-    for(let i=1; i<rows; i++){
-        radArr.push(min_radius + stripe*i);
-    };
-    let tot = 0;
-
-    for(let s=0;s<numSections;s++){
-        // this is the base angular value the dots begin to be drawn
-        let base = (angleSize + gapLines)*s + startIncline;
-
-        /*  coordsGen takes 5 par:
-            - radArr: length array. It contains all the arcs radii that 
-                        will be filled with circles
-            - mepRad: the size of a single circle
-            - angleSize: section dimension (the arc size)
-            - base: see above comment
-            - s+1: a optional parameter used to track the position of dots
-                    through different sections
-
-            returns an array of objects with polar coords and draw order
-         */
-        let mepCoords = coordsGenerator(radArr, mepRad, angleSize, base,s+1);
-        // store total number of points(coordinates) returned
-        tot += mepCoords.length;
-        mepCoords.forEach(dot => {
-            // each point have its coords translated to cartesian and
-            // drawn in user coords system
-            let pt = polarToCartesian(dot.radius,toDegree(dot.angle));
-            drawPoint( pt.x, pt.y, mepRad, undefined, dot.pos);
-        });
-    };
-    let pts = document.querySelectorAll('#svg-container .dot');
+// ux functions 
+function addNotification(){
+        let pts = document.querySelectorAll('#svg-container .dot');
     pts.forEach(pt => {
         pt.addEventListener('mouseover', displayNotification);
          pt.addEventListener('mouseout', removeNotification)
     });
-    totTitle.innerText = tot;
 }
 
 function displayNotification(e){
@@ -215,118 +227,6 @@ function removeNotification(e){
     notification.classList.remove('fadeIn');
 }
 
-function drawCircle(radius, fill='none', stroke="none"){
-    let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-
-    circle.setAttribute('cx', center[0]);
-    circle.setAttribute('cy', center[1]);
-    circle.setAttribute('r', radius);
-    circle.setAttribute('stroke', stroke);
-    circle.setAttribute('fill', fill);
-
-    root.appendChild(circle);
-};
-
-function setPoints(n, radius, spread, gap=0, base=0) {
-    let cartesianEndPoints;
-    let pointArr = [];
-    let point;
-    // create points (translating from polar coords to cartesian) and 
-    // for each subsequent point add spread (the section angular 
-    // dimension) and, if set, gap (the angular dimension of the space 
-    // left empty between two sections)
-    for(let i=0;i<n;i++){
-        cartesianEndPoints = polarToCartesian(radius, base);
-        point = setPoint(cartesianEndPoints.x, cartesianEndPoints.y);
-        pointArr.push(point);
-        base += spread;
-        
-        if(gap > 0) {
-            cartesianEndPoints = polarToCartesian(radius, base);
-            point = setPoint(cartesianEndPoints.x, cartesianEndPoints.y);
-            pointArr.push(point);
-            base += gap;
-        };
-
-    };
-
-    return pointArr;
-};
-
-function setPoint(cx, cy){
-    return {x: center[0] + cx, y: center[1] - cy}
-}
-
-function drawPoint(cx, cy, rad, col="#222", data){
-    let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-
-    circle.setAttribute('cx', center[0] + cx);
-    circle.setAttribute('cy', center[1] - cy);
-    circle.setAttribute('r', rad);
-    circle.setAttribute('fill', col);
-    circle.setAttribute('class', 'dot');
-    if(data){
-        circle.setAttribute('data-attr', data);
-    }
-
-    root.appendChild(circle);
-
-    return {x: center[0] + cx, y: center[1] - cy}
-}
-
-function drawPath(points){
-    let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    let pathVals = "";
-    pathVals += `M${points[0].x} ${points[0].y} `;
-    pathVals += `A ${min_radius} ${min_radius} 0 0 0 ${points[1].x} ${points[1].y} `;
-    pathVals += `L${points[3].x} ${points[3].y} `;
-    pathVals += `A ${max_radius} ${max_radius} 1 0 1 ${points[2].x} ${points[2].y} `;
-    pathVals += `L${points[0].x} ${points[0].y} `;
-
-    path.setAttribute('d', pathVals);
-    path.setAttribute('fill', 'none');
-    path.setAttribute('stroke', '#222');
-
-    root.appendChild(path);
-}
-
-// count number of circles (chord = diameter) lying on an arc
-function countCirclesOnArc(circleRadius, arcRadius, arcAngle, degree=true) {
-    const angle = degree ? toRadians(arcAngle) : arcAngle;
-    // chordLength = 2 * arcRadius * Math.sin(radians(angle)/2);
-    
-    // The chord we suppose to have the length of is equal to the diameter of the circle; since it will be
-    // divided by 2 to fit the equation we use its radius as is
-    const oneCircleArcAngle = 2 * Math.asin(circleRadius/arcRadius);
-    const totalCircles = Math.round(angle / oneCircleArcAngle); // approx.
-    return {single: oneCircleArcAngle, total: totalCircles};
-};
-
-function coordsGenerator (radiusArr, circleRadius, arcAngle, base=0, nDrawn=-1) {
-    const coordsArr = [];
-    let MAX_ANGLE = 0;
-    radiusArr.forEach((rad, i) => {
-        const placementData = countCirclesOnArc(circleRadius, rad, arcAngle);
-        
-        // (angle needed to accomodate one circle * n circles) - angle/2
-        // Last subtraction needed because the first element is centered
-        // (means that half circle is not evaluated)
-        MAX_ANGLE = (placementData.single * placementData.total) - (placementData.single/2);
-
-        for(let j=1; j <= placementData.total; j++) {
-            const centerAngle = j * placementData.single;
-            if(centerAngle > MAX_ANGLE) return;
-            
-            const dot = {angle: centerAngle + toRadians(base), radius: rad, pos:[i, j]};
-
-            if(nDrawn !== -1) dot.pos.push(nDrawn);
-            coordsArr.push(dot);
-        };
-    });
-    return coordsArr;
-};
-
-// ux functions used to make visible/hidden paths and dots
 function toggleDots(){
     let dots = document.querySelectorAll('#svg-container .dot');
     innerLabel.classList.toggle('hidden');
@@ -344,37 +244,8 @@ function togglePaths(){
     if(pathMissing) drawHemicycle();
 }
 
-// remove only specific elements from svg
-function cleanNodes(svgNode, children){
-    for(let i=0; i< children.length; i++){
-        svgNode.removeChild(children[i]);
-    };
-};
-
-// clean up everything on svg
-function cleanSvg(svgNode){
-    while(svgNode.childNodes[0]) {
-        svgNode.removeChild(svgNode.childNodes[0]);
-    };
-};
-
-
-function polarToCartesian (r, angle) {
-    let x = r * Math.cos(toRadians(angle));
-    let y = r * Math.sin(toRadians(angle));
-    return {x, y};
-};
-
-function cartesianToPolar (x, y) {
-    let r = Math.sqrt(x**2 + y**2);
-    let angle = toDegree(Math.atan(y/x));
-    return {r, angle};
-};
-
-function toRadians (degree) {return (degree * Math.PI)/180};
-function toDegree  (radians) {return (radians * 180)/Math.PI};
-
-// input listener allow cool dynamic change but is risky when typing
+// input event listener allow cool dynamic change but is risky
+// when typing
 minRadiusInput.addEventListener('change', drawHemicycle);
 maxRadiusInput.addEventListener('change', drawHemicycle);
 numSectionsInput.addEventListener('change', drawHemicycle);
