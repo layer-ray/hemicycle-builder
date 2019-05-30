@@ -62,20 +62,41 @@ input {
     width: 20%;
 }
 
+.popup,
 .notification {
     position: absolute;
-    background-color: #fff;
-    border: 1px solid #222;
     padding: 1rem;
-    opacity: 0.8;
-    z-index: 100;
-    opacity: 0;
-    transition: opacity 200ms;
+    z-index: 100;   
     pointer-events: none;
 }
 
-.fadeIn {
-    opacity: 1
+.popup.info {
+    opacity: 0;
+    transition: opacity 200ms;
+
+    background-color: #fff;
+    border: 1px solid #222;
+}
+.notification.error  {
+    top: -100px;
+    left: 0;
+    right: 0;
+    width: 400px;
+    margin: auto;
+    border-radius: 20px;
+    transition: top 400ms;
+    
+    background-color: #faa;
+    border: 1px solid #400;
+    color: #400;
+}
+
+.popup.info.fadeIn {
+    opacity: 1;
+}
+
+.notification.error.slideIn {
+    top: 150px;
 }
 
 .hidden {

@@ -39,7 +39,7 @@ export function drawFillerDots(svgElement, pointCoords, dotRadius, origin){
     pointCoords.forEach(dot => {
         // each point have its coords translated to cartesian and
         // drawn in user coords system
-        // center is moved up, otherwise center will be 
+        // center is moved up, otherwise it will be 
         // drawn on the perimeter (dot must be inside).
         // Is moved up by a factor of 3/2 to have it inside plus a 
         // minimum padding

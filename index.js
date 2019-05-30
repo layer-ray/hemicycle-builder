@@ -22,12 +22,13 @@ let rowsInput = document.getElementById('rows');
 let mepRadInput = document.getElementById('dot-radius');
 
 // ux variables
-let notification = document.getElementById('notification');
+let popup = document.getElementById('popup');
 let innerLabel = document.getElementById('inner-label');
 let innerOptions = document.getElementById('inner-options');
 let sectionBordersCheck = document.getElementById('section-borders');
 let fillerDotsCheck = document.getElementById('filler-dots');
 let totTitle = document.getElementById('tot');
+let notification = document.getElementById('notification');
 
 // initial state
 let center = {x: 400, y:280};
@@ -72,7 +73,7 @@ root.setAttribute('class', 'svg-root');
 // append ui element and svg to container
 containerDiv.appendChild(innerLabel);
 containerDiv.appendChild(innerOptions);
-containerDiv.appendChild(notification);
+containerDiv.appendChild(popup);
 
 containerDiv.appendChild(root);
 // append container to body
@@ -139,7 +140,7 @@ function drawHemicycle(){
         };
 
         totTitle.innerText = pointCoordsArr.total;
-        addNotification();
+        addPopup();
     } else {
         dotMissing = true;
     };
@@ -147,13 +148,9 @@ function drawHemicycle(){
 
 function validateInput(){
  // validation - if error restore previous values
-    if(+widthInput.value/2 <= max_radius ||  +heightInput.value/2 <= max_radius){
+    if(+maxRadiusInput.value > Math.min(center.x, center.y) ){
         widthInput.value =  wpWidth;
         heightInput.value = wpHeight;
-        throw Error('Max dimension reached. Please increase the size of viewport to create bigger hemicycles');
-    };
-
-    if(+maxRadiusInput.value > Math.min(center.x, center.y) ){
         maxRadiusInput.value = max_radius;
         throw Error('Max dimension reached. Please increase the size of viewport to create bigger hemicycles');
     };
@@ -204,27 +201,35 @@ function validateInput(){
 }
 
 // ux functions 
-function addNotification(){
-        let pts = document.querySelectorAll('#svg-container .dot');
+function addPopup(){
+    let pts = document.querySelectorAll('#svg-container .dot');
     pts.forEach(pt => {
-        pt.addEventListener('mouseover', displayNotification);
-         pt.addEventListener('mouseout', removeNotification)
+        pt.addEventListener('mouseover', displayPopup);
+         pt.addEventListener('mouseout', removePopup)
     });
 }
 
-function displayNotification(e){
+function displayPopup(){
     let x = parseFloat(this.getAttribute('cx'));
     let y = parseFloat(this.getAttribute('cy'));
     let pos = this.getAttribute('data-attr');
     // position the box bottom-right of cursor
-    notification.style.top =  (y + 10) + 'px';
-    notification.style.left =  (x + 20)  + 'px';
-    notification.innerText = `pos: ${pos}`;
-    notification.classList.add('fadeIn');
+    popup.style.top =  (y + 10) + 'px';
+    popup.style.left =  (x + 20)  + 'px';
+    popup.innerText = `pos: ${pos}`;
+    popup.classList.add('fadeIn');
 }
 
-function removeNotification(e){
-    notification.classList.remove('fadeIn');
+function removePopup(){
+    popup.classList.remove('fadeIn');
+}
+
+function displayNotification(e){
+    notification.innerText = e.message;
+    notification.classList.add('slideIn');
+    setTimeout(() => {
+        notification.classList.remove('slideIn');
+    }, 3000);
 }
 
 function toggleDots(){
@@ -261,3 +266,5 @@ heightInput.addEventListener('change', drawHemicycle);
 
 sectionBordersCheck.addEventListener('change', togglePaths);
 fillerDotsCheck.addEventListener('change', toggleDots);
+
+window.addEventListener('error', displayNotification)
