@@ -4,7 +4,7 @@
   "description": "An essential tool used to build hemicycles based on user input.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "parcel index.html"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/layer-ray/hemicycle-builder/issues"
   },
-  "homepage": "https://github.com/layer-ray/hemicycle-builder#readme"
+  "homepage": "https://github.com/layer-ray/hemicycle-builder#readme",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3"
+  }
 }
