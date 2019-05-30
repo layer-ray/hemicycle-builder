@@ -23,5 +23,8 @@
   "homepage": "https://github.com/layer-ray/hemicycle-builder#readme",
   "devDependencies": {
     "parcel-bundler": "^1.12.3"
+  },
+  "dependencies": {
+    "file-saver": "^2.0.2"
   }
 }
