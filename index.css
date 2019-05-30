@@ -2,6 +2,18 @@ body {
     font-family: Arial, sans-serif;
 }
 
+/* reset button */
+button {
+    padding: 0;
+    border: none;
+    font: inherit;
+    color: inherit;
+    background-color: transparent;
+    /* show a hand cursor on hover; some argue that we
+    should keep the default arrow cursor for buttons */
+    cursor: pointer;
+}
+
 #svg-container {
     position: relative;
     margin: auto;
@@ -101,4 +113,31 @@ input {
 
 .hidden {
     display: none;
+}
+
+.buttons {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: -2px;
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.btn {
+    flex-grow: 1;
+    padding: 1rem;
+    font: 400 0.8rem Verdana, Geneva, sans-serif;
+}
+
+.btn.success {
+    background-color: #afa;
+    border: 1px solid #222;
+    color: #444;
+    transition: background-color 200ms;
+}
+
+.btn.success:hover {
+    background-color: #686;
+    color: #fff;
 }

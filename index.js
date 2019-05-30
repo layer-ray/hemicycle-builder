@@ -29,6 +29,7 @@ let sectionBordersCheck = document.getElementById('section-borders');
 let fillerDotsCheck = document.getElementById('filler-dots');
 let totTitle = document.getElementById('tot');
 let notification = document.getElementById('notification');
+let buttons = document.getElementById('buttons');
 
 // initial state
 let center = {x: 400, y:280};
@@ -74,6 +75,7 @@ root.setAttribute('class', 'svg-root');
 containerDiv.appendChild(innerLabel);
 containerDiv.appendChild(innerOptions);
 containerDiv.appendChild(popup);
+containerDiv.appendChild(buttons);
 
 containerDiv.appendChild(root);
 // append container to body
